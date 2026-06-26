@@ -96,11 +96,12 @@
 
     <script>
         if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-            // Carga tu archivo privado local de la laptop (no está en GitHub)
+            // En tu laptop: Lee de tu archivo config.js que no está en GitHub
             document.write('<script src="config.js"><\/script>');
         } else {
-            // Carga la plantilla en producción que usa las variables ocultas de Vercel
-            document.write('<script src="config.prod.js"><\/script>');
+            // En Vercel: Lee directamente las variables inyectadas por el servidor
+            window.SUPABASE_URL = "process.env.SUPABASE_URL";
+            window.SUPABASE_ANON_KEY = "process.env.SUPABASE_ANON_KEY";
         }
     </script>
     <script src="app.js"></script>
