@@ -1,9 +1,14 @@
 :root {
     --primary: #b71c1c;
     --primary-dark: #7f0000;
+    --warning: #e65100;
     --background: #f5f5f5;
     --card-bg: #ffffff;
     --text: #212121;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
@@ -12,6 +17,7 @@ body {
     padding: 0;
     background-color: var(--background);
     color: var(--text);
+    padding-bottom: 90px; /* Espacio para que los botones fijos no tapen el contenido */
 }
 
 header {
@@ -22,7 +28,7 @@ header {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-header h1 { margin: 0; font-size: 1.8rem; }
+header h1 { margin: 0; font-size: 1.6rem; }
 header p { margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9; }
 
 main {
@@ -33,35 +39,72 @@ main {
 
 h2 { font-size: 1.2rem; margin-bottom: 10px; }
 
+/* BUSCADOR */
 #search-input {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     border-radius: 8px;
-    box-sizing: border-box;
     margin-bottom: 15px;
+    outline: none;
+}
+
+#search-input:focus {
+    border-color: var(--primary);
 }
 
 #results-container {
     margin-bottom: 30px;
 }
 
+/* FICHAS DE RESULTADOS (CARDS) */
 .card {
     background: var(--card-bg);
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-left: 5px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 6px solid #ccc;
 }
 
 .card.missing { border-left-color: var(--primary); }
 .card.found { border-left-color: #2e7d32; }
 
-.card h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
-.card p { margin: 3px 0; font-size: 0.9rem; color: #555; }
+.card h3 { margin: 0 0 8px 0; font-size: 1.2rem; text-transform: uppercase; }
+.card p { margin: 4px 0; font-size: 0.95rem; color: #333; }
+.card strong { color: #111; }
+.card a { color: #0d47a1; text-decoration: none; font-weight: bold; }
 
+/* BOTONES PRINCIPALES */
+.btn {
+    border: none;
+    padding: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-danger { background: var(--primary); }
+.btn-warning { background: var(--warning); }
+
+.btn-danger-block, .btn-warning-block {
+    width: 100%;
+    margin-top: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.btn-danger-block { background: var(--primary); }
+.btn-warning-block { background: var(--warning); }
+
+/* BARRA INFERIOR FIJA PARA MÓVILES */
 #actions-section {
     position: fixed;
     bottom: 0;
@@ -69,22 +112,84 @@ h2 { font-size: 1.2rem; margin-bottom: 10px; }
     width: 100%;
     background: white;
     padding: 15px;
-    box-sizing: border-box;
     display: flex;
-    gap: 10px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    gap: 12px;
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+    z-index: 900;
 }
 
-#actions-section button {
+#actions-section .btn {
     flex: 1;
-    padding: 15px;
-    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* VENTANAS MODALES (FORMULARIOS) */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.6); 
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 22px;
+    border-radius: 12px;
+    width: 92%;
+    max-width: 480px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.close {
+    position: absolute;
+    right: 18px;
+    top: 10px;
+    font-size: 32px;
     font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    color: white;
+    color: #aaa;
     cursor: pointer;
 }
 
-.btn-danger { background-color: var(--primary); }
-.btn-share { background-color: #0d47a1; }
+.close:hover { color: #000; }
+
+/* ESTILOS DE FORMULARIO */
+form h3 { margin-top: 0; margin-bottom: 15px; color: var(--primary-dark); }
+form label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.9rem; }
+form input[type="text"], form input[type="tel"], form select, form textarea {
+    width: 100%;
+    padding: 11px;
+    margin-top: 5px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.checkbox-container {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #eaeaea;
+    padding: 10px;
+    border-radius: 6px;
+}
+.checkbox-container input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.info-text { text-align: center; color: #666; font-style: italic; margin-top: 20px; }

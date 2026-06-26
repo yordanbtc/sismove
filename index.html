@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS Sismo VE - Emergencia</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <h1>🚨 SOS Sismo VE</h1>
+        <p>Búsqueda de Desaparecidos y Coordinación de Ayuda</p>
+    </header>
+
+    <main>
+        <section id="search-section">
+            <h2>Buscar Persona Desaparecida</h2>
+            <input type="text" id="search-input" placeholder="Escribe nombre o apellido para buscar...">
+            <div id="results-container">
+                <p class="info-text">Cargando reportes recientes...</p>
+            </div>
+        </section>
+
+        <section id="actions-section">
+            <button class="btn btn-danger" onclick="openModal('modal-missing')">📢 Reportar Desaparecido</button>
+            <button class="btn btn-warning" onclick="openModal('modal-help')">📦 Solicitar Ayuda</button>
+        </section>
+
+        <div id="modal-missing" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('modal-missing')">&times;</span>
+                <h3>Reportar Persona Desaparecida</h3>
+                <form id="form-missing">
+                    <label>Nombre(s): *</label>
+                    <input type="text" id="m-firstname" required>
+
+                    <label>Apellido(s): *</label>
+                    <input type="text" id="m-lastname" required>
+
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="m-has-id" checked onchange="toggleDniField()">
+                        <label for="m-has-id">Posee Cédula de Identidad (DNI)</label>
+                    </div>
+
+                    <div id="dni-field-container">
+                        <label>Número de Cédula / DNI: *</label>
+                        <input type="text" id="m-dni">
+                    </div>
+
+                    <label>Última vez visto (Lugar/Sector): *</label>
+                    <input type="text" id="m-location" placeholder="Ej: Av. Principal, Bachaquero" required>
+
+                    <label>Descripción corta (Anatomía, vestimenta, etc.): *</label>
+                    <input type="text" id="m-description" maxlength="125" placeholder="Vestía camisa azul, cicatriz en la mano..." required>
+
+                    <label>Teléfono de Contacto de un familiar: *</label>
+                    <input type="tel" id="m-phone" placeholder="Ej: 04121234567" required>
+
+                    <button type="submit" class="btn btn-danger-block">Enviar Reporte Público</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modal-help" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('modal-help')">&times;</span>
+                <h3>Solicitar Ayuda Comunitaria</h3>
+                <form id="form-help">
+                    <label>Nombre de contacto: *</label>
+                    <input type="text" id="h-name" required>
+
+                    <label>Teléfono de contacto: *</label>
+                    <input type="tel" id="h-phone" required>
+
+                    <label>Ubicación exacta de la necesidad: *</label>
+                    <input type="text" id="h-location" placeholder="Ej: Sector El Parral, Calle 3" required>
+
+                    <label>Categoría de la emergencia: *</label>
+                    <select id="h-category">
+                        <option value="GENERAL">General / Otro</option>
+                        <option value="HEALTH">Salud / Medicinas</option>
+                        <option value="WATER">Agua / Alimentos</option>
+                        <option value="SHELTER">Refugio / Vivienda</option>
+                        <option value="RESCUE">Rescate / Atrapados</option>
+                    </select>
+
+                    <label>Planteamiento del caso (¿Qué se necesita?): *</label>
+                    <textarea id="h-description" rows="4" required></textarea>
+
+                    <button type="submit" class="btn btn-warning-block">Enviar Solicitud de Ayuda</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+            // Carga tu archivo privado local de la laptop (no está en GitHub)
+            document.write('<script src="config.js"><\/script>');
+        } else {
+            // Carga la plantilla en producción que usa las variables ocultas de Vercel
+            document.write('<script src="config.prod.js"><\/script>');
+        }
+    </script>
+    <script src="app.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
