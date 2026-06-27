@@ -126,6 +126,7 @@ function renderHelpCards(requests) {
         card.className = 'card card-help';
         card.innerHTML = `
             <h3>${labels[req.category] || req.category}</h3>
+            <p><strong>Fecha:</strong> ${formatDate(req.created_at)}</p>
             <p><strong>Persona:</strong> ${req.contact_name}</p>
             <p><strong>Ubicación:</strong> ${req.location}</p>
             <p><strong>Detalle:</strong> ${req.case_description}</p>
@@ -296,6 +297,7 @@ function renderCards(people) {
         card.className = `card ${person.status.toLowerCase()}`;
         card.innerHTML = `
             <h3>${person.first_name} ${person.last_name}</h3>
+            <p><strong>Fecha:</strong> ${formatDate(person.created_at)}</p>
             <p><strong>DNI:</strong> ${person.dni || 'No posee'}</p>
             <p><strong>Ubicación:</strong> ${person.last_seen_location}</p>
             <p><strong>Detalles:</strong> ${person.description}</p>
@@ -395,4 +397,10 @@ async function getClientIP() {
         console.warn("No se pudo obtener la IP:", error);
         return '0.0.0.0'; // Valor por defecto si falla
     }
+}
+
+// --- FORMATEO DE FECHAS ---
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
 }
