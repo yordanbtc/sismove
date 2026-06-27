@@ -11,6 +11,7 @@
     <header>
         <h1>🚨 SOS Sismo VE</h1>
         <p>Búsqueda de Desaparecidos y Coordinación de Ayuda TERREMOTO 24JUN2026</p>
+        <div id="auth-btn-container" style="margin-top: 15px;"></div>
     </header>
     
     <div id="stats-container" class="stats-bar">
@@ -18,7 +19,6 @@
         Enc: <span id="count-found">0</span> | 
         Fall: <span id="count-dead">0</span>
     </div>
-
     <div class="view-selector">
         <button id="btn-view-missing" onclick="switchView('missing')">Desaparecidos</button>
         <button id="btn-view-help" class="active" onclick="switchView('help')">Solicitudes de Ayuda</button>
@@ -27,7 +27,7 @@
     <main>
         <section id="search-section">
             <h2>Buscar</h2>
-            <input type="text" id="search-input" placeholder="Escribe nombre o apellido para buscar...">
+            <input type="text" id="search-input" placeholder="Escribe para buscar...">
             <div id="results-container">
                 <p class="info-text">Cargando reportes...</p>
             </div>
