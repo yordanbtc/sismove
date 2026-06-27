@@ -54,11 +54,12 @@
     <!-- Bloque de configuración corregido -->
     <script>
         if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+            // En local sigue cargando tu archivo de configuración
             document.write('<script src="config.js"><\/script>');
         } else {
-            // Reemplaza con tus variables de producción
-            window.SUPABASE_URL = "TU_URL_AQUI";
-            window.SUPABASE_ANON_KEY = "TU_KEY_AQUI";
+            // Estos son los marcadores que tu comando sed está buscando
+            window.SUPABASE_URL = "process.env.SUPABASE_URL";
+            window.SUPABASE_ANON_KEY = "process.env.SUPABASE_ANON_KEY";
         }
     </script>
     
