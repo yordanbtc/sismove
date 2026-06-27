@@ -10,100 +10,59 @@
 <body>
     <header>
         <h1>🚨 SOS Sismo VE</h1>
-        <p>Búsqueda de Desaparecidos y Coordinación de Ayuda</p>
+        <p>Búsqueda de Desaparecidos y Coordinación de Ayuda TERREMOTO 24JUN2026</p></p>
     </header>
+    
+    <div id="stats-container" class="stats-bar">
+        Des: <span id="count-missing">0</span> | 
+        Enc: <span id="count-found">0</span> | 
+        Fall: <span id="count-dead">0</span>
+    </div>
+
+    <div class="view-selector">
+        <button id="btn-view-missing" onclick="switchView('missing')">Desaparecidos</button>
+        <button id="btn-view-help" class="active" onclick="switchView('help')">Solicitudes de Ayuda</button>
+    </div>
 
     <main>
         <section id="search-section">
-            <h2>Buscar Persona Desaparecida</h2>
+            <h2>Buscar Persona</h2>
             <input type="text" id="search-input" placeholder="Escribe nombre o apellido para buscar...">
             <div id="results-container">
-                <p class="info-text">Cargando reportes recientes...</p>
+                <p class="info-text">Cargando reportes...</p>
             </div>
         </section>
 
         <section id="actions-section">
-            <button class="btn btn-danger" onclick="openModal('modal-missing')">📢 Reportar Desaparecido</button>
+            <button class="btn btn-danger" onclick="openModal('modal-missing')">📢 Reportar Caso</button>
             <button class="btn btn-warning" onclick="openModal('modal-help')">📦 Solicitar Ayuda</button>
         </section>
 
-        <div id="modal-missing" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('modal-missing')">&times;</span>
-                <h3>Reportar Persona Desaparecida</h3>
-                <form id="form-missing">
-                    <label>Nombre(s): *</label>
-                    <input type="text" id="m-firstname" required>
+        <div id="modal-container"></div>
 
-                    <label>Apellido(s): *</label>
-                    <input type="text" id="m-lastname" required>
-
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="m-has-id" checked onchange="toggleDniField()">
-                        <label for="m-has-id">Posee Cédula de Identidad (DNI)</label>
-                    </div>
-
-                    <div id="dni-field-container">
-                        <label>Número de Cédula / DNI: *</label>
-                        <input type="text" id="m-dni">
-                    </div>
-
-                    <label>Última vez visto (Lugar/Sector): *</label>
-                    <input type="text" id="m-location" placeholder="Ej: Av. Principal, Bachaquero" required>
-
-                    <label>Descripción corta (Anatomía, vestimenta, etc.): *</label>
-                    <input type="text" id="m-description" maxlength="125" placeholder="Vestía camisa azul, cicatriz en la mano..." required>
-
-                    <label>Teléfono de Contacto de un familiar: *</label>
-                    <input type="tel" id="m-phone" placeholder="Ej: 04121234567" required>
-
-                    <button type="submit" class="btn btn-danger-block">Enviar Reporte Público</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="modal-help" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('modal-help')">&times;</span>
-                <h3>Solicitar Ayuda Comunitaria</h3>
-                <form id="form-help">
-                    <label>Nombre de contacto: *</label>
-                    <input type="text" id="h-name" required>
-
-                    <label>Teléfono de contacto: *</label>
-                    <input type="tel" id="h-phone" required>
-
-                    <label>Ubicación exacta de la necesidad: *</label>
-                    <input type="text" id="h-location" placeholder="Ej: Sector El Parral, Calle 3" required>
-
-                    <label>Categoría de la emergencia: *</label>
-                    <select id="h-category">
-                        <option value="GENERAL">General / Otro</option>
-                        <option value="HEALTH">Salud / Medicinas</option>
-                        <option value="WATER">Agua / Alimentos</option>
-                        <option value="SHELTER">Refugio / Vivienda</option>
-                        <option value="RESCUE">Rescate / Atrapados</option>
-                    </select>
-
-                    <label>Planteamiento del caso (¿Qué se necesita?): *</label>
-                    <textarea id="h-description" rows="4" required></textarea>
-
-                    <button type="submit" class="btn btn-warning-block">Enviar Solicitud de Ayuda</button>
-                </form>
-            </div>
+        <div id="pagination-container">
+            <button id="prev-page">Anterior</button>
+            <span id="page-info">Página 1</span>
+            <button id="next-page">Siguiente</button>
         </div>
     </main>
 
+    <footer style="text-align: center; padding: 20px; font-size: 0.8rem; color: #666;">
+        <a href="README.md" target="_blank" style="color: #b71c1c;">Declaración de Responsabilidad y Uso</a>
+    </footer>
+
+    <!-- Bloque de configuración corregido -->
     <script>
         if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-            // En tu laptop: Lee de tu archivo config.js que no está en GitHub
             document.write('<script src="config.js"><\/script>');
         } else {
-            // En Vercel: Lee directamente las variables inyectadas por el servidor
-            window.SUPABASE_URL = "process.env.SUPABASE_URL";
-            window.SUPABASE_ANON_KEY = "process.env.SUPABASE_ANON_KEY";
+            // Reemplaza con tus variables de producción
+            window.SUPABASE_URL = "TU_URL_AQUI";
+            window.SUPABASE_ANON_KEY = "TU_KEY_AQUI";
         }
     </script>
+    
+    <!-- Cargamos la lógica después de definir las variables -->
     <script src="app.js"></script>
 </body>
 </html>

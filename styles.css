@@ -68,8 +68,39 @@ h2 { font-size: 1.2rem; margin-bottom: 10px; }
     border-left: 6px solid #ccc;
 }
 
-.card.missing { border-left-color: var(--primary); }
-.card.found { border-left-color: #2e7d32; }
+#stats-container {
+    background-color: var(--background); /* Usamos la variable de fondo global */
+    color: #333;
+    text-align: center;
+    padding: 12px 10px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+    
+    /* Sin bordes, sin sombras, plano */
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    
+    /* Centrado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    
+    font-weight: bold;
+    font-size: 0.95rem;
+    z-index: 100;
+}
+#count-missing { color: var(--primary); }
+#count-found { color: #2e7d32; }
+#count-dead { color: #7f8c8d; }
+
+
+/* Colores para las tarjetas según estado */
+.card.dead { border-left: 5px solid #ff4d4d; } /* Rojo para alerta */
+.card.found { border-left: 5px solid #2ecc71; }   /* Verde para encontrado */
+.card.missing { border-left: 5px solid #fde403; }    /* Gris para fallecido */
 
 .card h3 { margin: 0 0 8px 0; font-size: 1.2rem; text-transform: uppercase; }
 .card p { margin: 4px 0; font-size: 0.95rem; color: #333; }
@@ -193,3 +224,53 @@ form input:focus, form select:focus, form textarea:focus {
 }
 
 .info-text { text-align: center; color: #666; font-style: italic; margin-top: 20px; }
+
+
+/* Estilo para que la barra de estadísticas se vea integrada */
+
+
+/* Ajuste para separar el texto del contador */
+.stats-bar span {
+    margin: 0 5px;
+}
+
+.view-selector {
+    display: flex;
+    justify-content: center;
+    background: #e0e0e0;
+    padding: 5px;
+    margin: 10px auto 20px auto;
+    max-width: 600px;
+    border-radius: 8px;
+}
+
+.view-selector button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.view-selector button.active {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    color: var(--primary);
+}
+
+/* Modifica esto en tu styles.css */
+#pagination-container {
+    margin: 20px auto; /* Centrado y con margen superior e inferior */
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    text-align: center;
+    background-color: transparent; /* Fondo transparente para que se vea integrado */
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    border-top: none; /* Quitamos la línea divisoria si ya no es una barra fija */
+    z-index: 1; /* Quitamos el z-index alto */
+}

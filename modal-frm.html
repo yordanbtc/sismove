@@ -1,0 +1,72 @@
+<div id="modal-missing" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('modal-missing')">&times;</span>
+                <h3>Reportar Caso</h3>
+                <form id="form-missing">
+                    <label>Estatus del caso*</label>
+                    <select id="m-status">
+                        <option value="MISSING">DESAPARECIDO</option>
+                        <option value="DEAD">FALLECIDO</option>
+                        <option value="FOUND">ENCONTRADO</option>
+                    </select>
+
+                    <label>Nombre(s): *</label>
+                    <input type="text" id="m-firstname" required>
+
+                    <label>Apellido(s): *</label>
+                    <input type="text" id="m-lastname" required>
+
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="m-has-id" checked onchange="toggleDniField()">
+                        <label for="m-has-id">Posee Cédula de Identidad (DNI)</label>
+                    </div>
+
+                    <div id="dni-field-container">
+                        <label>Número de Cédula / DNI: *</label>
+                        <input type="text" id="m-dni">
+                    </div>
+
+                    <label>Última vez visto (Lugar/Sector): *</label>
+                    <input type="text" id="m-location" placeholder="Ej: Av. Principal, Bachaquero" required>
+
+                    <label>Descripción corta (Anatomía, vestimenta, etc.): *</label>
+                    <input type="text" id="m-description" maxlength="125" placeholder="Vestía camisa azul, cicatriz en la mano..." required>
+
+                    <label>Teléfono de Contacto de un familiar: *</label>
+                    <input type="tel" id="m-phone" placeholder="Ej: 04121234567" required>
+
+                    <button type="submit" class="btn btn-danger-block">Enviar Reporte Público</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modal-help" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('modal-help')">&times;</span>
+                <h3>Solicitar Ayuda Comunitaria</h3>
+                <form id="form-help">
+                    <label>Nombre de contacto: *</label>
+                    <input type="text" id="h-name" required>
+
+                    <label>Teléfono de contacto: *</label>
+                    <input type="tel" id="h-phone" required>
+
+                    <label>Ubicación exacta de la necesidad: *</label>
+                    <input type="text" id="h-location" placeholder="Ej: Sector El Parral, Calle 3" required>
+
+                    <label>Categoría de la emergencia: *</label>
+                    <select id="h-category">
+                        <option value="GENERAL">General / Otro</option>
+                        <option value="HEALTH">Salud / Medicinas</option>
+                        <option value="WATER">Agua / Alimentos</option>
+                        <option value="SHELTER">Refugio / Vivienda</option>
+                        <option value="RESCUE">Rescate / Atrapados</option>
+                    </select>
+
+                    <label>Planteamiento del caso (¿Qué se necesita?): *</label>
+                    <textarea id="h-description" rows="4" required></textarea>
+
+                    <button type="submit" class="btn btn-warning-block">Enviar Solicitud de Ayuda</button>
+                </form>
+            </div>
+        </div>

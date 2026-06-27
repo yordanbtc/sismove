@@ -1,8 +1,12 @@
 // app.js - LÓGICA PRINCIPAL DE LA APP DE EMERGENCIA
-// Las variables SUPABASE_URL y SUPABASE_ANON_KEY son leídas desde config.js
-
-// Inicializar el cliente global de Supabase
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// --- ESTADO DE LA APLICACIÓN Y PAGINACIÓN ---
+let currentView = 'help';
+let currentPage = 1;
+let totalPages = 1;
+const ITEMS_PER_PAGE = 10;
+
 
 // --- CONTROL DE VENTANAS MODALES ---
 function openModal(id) { 
@@ -13,20 +17,116 @@ function closeModal(id) {
     document.getElementById(id).style.display = "none"; 
 }
 
-// Ocultar/Mostrar dinámicamente el campo Cédula si es menor o indocumentado
-function toggleDniField() {
-    const hasId = document.getElementById('m-has-id').checked;
-    const container = document.getElementById('dni-field-container');
-    const dniInput = document.getElementById('m-dni');
-    
-    if (hasId) {
-        container.style.display = "block";
-        dniInput.setAttribute('required', 'true');
-    } else {
-        container.style.display = "none";
-        dniInput.removeAttribute('required');
-        dniInput.value = '';
+async function loadModals() {
+    try {
+        const response = await fetch('modal-frm.html');
+        const data = await response.text();
+        document.getElementById('modal-container').innerHTML = data;
+    } catch (error) {
+        console.error("Error al cargar los modales:", error);
     }
+}
+
+// --- ACTUALIZACIÓN DE ESTADÍSTICAS ---
+async function updateStats() {
+    // Obtenemos los conteos agrupados por estado
+    const { data, error } = await supabaseClient
+        .from('affected_people')
+        .select('status'); 
+
+    if (!error && data) {
+        // Contamos manualmente los resultados recibidos
+        const stats = {
+            MISSING: data.filter(p => p.status === 'MISSING').length,
+            FOUND: data.filter(p => p.status === 'FOUND').length,
+            DEAD: data.filter(p => p.status === 'DEAD').length
+        };
+
+        // Actualizamos el DOM
+        document.getElementById('count-missing').textContent = stats.MISSING;
+        document.getElementById('count-found').textContent = stats.FOUND;
+        document.getElementById('count-dead').textContent = stats.DEAD;
+    }
+}
+
+// --- NAVEGACIÓN ENTRE VISTAS ---
+
+// Corrección: Asegurar que switchView maneje bien el paginado
+function switchView(view) {
+    currentView = view;
+    currentPage = 1; 
+    
+    const btnMissing = document.getElementById('btn-view-missing');
+    const btnHelp = document.getElementById('btn-view-help');
+    
+    if (btnMissing) btnMissing.classList.toggle('active', view === 'missing');
+    if (btnHelp) btnHelp.classList.toggle('active', view === 'help');
+
+    // Limpiar búsqueda
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.value = '';
+
+    if (view === 'missing') {
+        document.getElementById('search-section').style.display = 'block';
+        loadRecentMissing();
+    } else {
+        document.getElementById('search-section').style.display = 'none';
+        document.getElementById('pagination-container').style.display = 'none';
+        loadHelpRequests();
+    }
+}
+
+// Carga de solicitudes de ayuda
+async function loadHelpRequests() {
+    // 1. Aseguramos visibilidad
+    const resultsContainer = document.getElementById('results-container');
+    resultsContainer.style.display = 'block'; 
+    document.getElementById('search-section').style.display = 'block'; // Ocultar esto si no quieres buscador en ayuda
+    
+    resultsContainer.innerHTML = '<p class="info-text">Cargando solicitudes...</p>';
+    
+    const { data, error } = await supabaseClient
+        .from('help_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        resultsContainer.innerHTML = '<p class="info-text">Error al cargar.</p>';
+        return;
+    }
+
+    // 2. Renderizar
+    renderHelpCards(data);
+}
+
+// Renderizado de tarjetas de ayuda (con traducción de etiquetas)
+function renderHelpCards(requests) {
+    if (requests.length === 0) {
+        resultsContainer.innerHTML = '<p class="info-text">No hay solicitudes registradas.</p>';
+        return;
+    }
+    
+    const labels = {
+        'WATER': '💧 Agua Potable',
+        'SHELTER': '⛺ Refugio/Carpa',
+        'HEALTH': '🚑 Salud/Médico',
+        'RESCUE': '🦺 Rescate',
+        'GENERAL': '📢 Apoyo General'
+    };
+
+    resultsContainer.innerHTML = '';
+    requests.forEach(req => {
+        const card = document.createElement('div');
+        card.className = 'card card-help';
+        card.innerHTML = `
+            <h3>${labels[req.category] || req.category}</h3>
+            <p><strong>Persona:</strong> ${req.contact_name}</p>
+            <p><strong>Ubicación:</strong> ${req.location}</p>
+            <p><strong>Detalle:</strong> ${req.case_description}</p>
+            <p><strong>Contacto:</strong> <a href="tel:${req.phone}">${req.phone}</a></p>
+        `;
+        resultsContainer.appendChild(card);
+    });
 }
 
 // Escuchar clics fuera de las ventanas modales para cerrarlas
@@ -36,147 +136,207 @@ window.onclick = function(event) {
     }
 }
 
-
-// --- MANEJO DE FORMULARIO: REPORTE DE DESAPARECIDO ---
-document.getElementById('form-missing').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Ocultar/Mostrar dinámicamente el campo Cédula
+function toggleDniField() {
+    const checkbox = document.getElementById('m-has-id');
+    if (!checkbox) return;
     
-    const firstName = document.getElementById('m-firstname').value.trim();
-    const lastName = document.getElementById('m-lastname').value.trim();
-    const hasId = document.getElementById('m-has-id').checked;
-    const dni = hasId ? document.getElementById('m-dni').value.trim() : null;
-    const location = document.getElementById('m-location').value.trim();
-    const description = document.getElementById('m-description').value.trim();
-    const phone = document.getElementById('m-phone').value.trim();
+    const container = document.getElementById('dni-field-container');
+    const dniInput = document.getElementById('m-dni');
+    
+    if (checkbox.checked) {
+        container.style.display = "block";
+        dniInput.setAttribute('required', 'true');
+    } else {
+        container.style.display = "none";
+        dniInput.removeAttribute('required');
+        dniInput.value = '';
+    }
+}
 
-    // Guardado directo en la tabla 'affected_people' (inserción pública permitida por RLS)
-    const { error } = await supabaseClient.from('affected_people').insert([{
-        first_name: firstName,
-        last_name: lastName,
-        has_id: hasId,
-        dni: dni,
-        last_seen_location: location,
-        description: description,
-        contact_phone: phone,
-        status: 'MISSING'
-    }]);
+// --- DELEGACIÓN DE EVENTOS ---
+document.addEventListener('submit', async (e) => {
+    
+    // 1. MANEJO: REPORTE DE DESAPARECIDO
+    if (e.target.id === 'form-missing') {
+        e.preventDefault();
 
-    if (error) {
-        if (error.code === '23505') { // Restricción UNIQUE de la Cédula/DNI activa en base de datos
-            alert('Atención: Ya existe una persona registrada en el sistema con ese número de Cédula/DNI.');
+        const status = document.getElementById('m-status').value;        
+        const firstName = document.getElementById('m-firstname').value.trim();
+        const lastName = document.getElementById('m-lastname').value.trim();
+        const hasId = document.getElementById('m-has-id').checked;
+        const dni = hasId ? document.getElementById('m-dni').value.trim() : null;
+        const location = document.getElementById('m-location').value.trim();
+        const description = document.getElementById('m-description').value.trim();
+        const phone = document.getElementById('m-phone').value.trim();
+
+        const { error } = await supabaseClient.from('affected_people').insert([{
+            status: status,
+            first_name: firstName,
+            last_name: lastName,
+            has_id: hasId,
+            dni: dni,
+            last_seen_location: location,
+            description: description,
+            contact_phone: phone
+        }]);
+
+        if (error) {
+            alert(error.code === '23505' ? 'Atención: Ya existe un registro con ese DNI.' : 'Error: ' + error.message);
         } else {
-            alert('No se pudo enviar el reporte: ' + error.message);
+            alert('Reporte registrado exitosamente.');
+            e.target.reset();
+            closeModal('modal-missing');
+            loadRecentMissing();
+            updateStats();
         }
-    } else {
-        alert('Reporte registrado exitosamente en el sistema de emergencia.');
-        document.getElementById('form-missing').reset();
-        closeModal('modal-missing');
-        toggleDniField(); // Resetea el estado del campo DNI a requerido
-        loadRecentMissing(); // Actualiza la lista principal al instante
+    }
+
+    // 2. MANEJO: SOLICITUD DE AYUDA
+    if (e.target.id === 'form-help') {
+        e.preventDefault();
+
+        const { error } = await supabaseClient.from('help_requests').insert([{
+            contact_name: document.getElementById('h-name').value.trim(),
+            phone: document.getElementById('h-phone').value.trim(),
+            location: document.getElementById('h-location').value.trim(),
+            category: document.getElementById('h-category').value,
+            case_description: document.getElementById('h-description').value.trim()
+        }]);
+
+        if (error) {
+            alert('Error al registrar solicitud: ' + error.message);
+        } else {
+            alert('Solicitud enviada con éxito.');
+            e.target.reset();
+            closeModal('modal-help');
+        }
     }
 });
-
-
-// --- MANEJO DE FORMULARIO: SOLICITUD DE AYUDA ---
-document.getElementById('form-help').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const name = document.getElementById('h-name').value.trim();
-    const phone = document.getElementById('h-phone').value.trim();
-    const location = document.getElementById('h-location').value.trim();
-    const category = document.getElementById('h-category').value;
-    const description = document.getElementById('h-description').value.trim();
-
-    // Guardado directo en la tabla 'help_requests'
-    const { error } = await supabaseClient.from('help_requests').insert([{
-        contact_name: name,
-        phone: phone,
-        location: location,
-        category: category,
-        case_description: description
-    }]);
-
-    if (error) {
-        alert('Hubo un error al registrar la solicitud: ' + error.message);
-    } else {
-        alert('Su solicitud de ayuda comunitaria ha sido enviada con éxito.');
-        document.getElementById('form-help').reset();
-        closeModal('modal-help');
-    }
-});
-
 
 // --- SISTEMA DE BÚSQUEDA Y RENDERIZADO ---
 const searchInput = document.getElementById('search-input');
 const resultsContainer = document.getElementById('results-container');
 
-// Escuchar lo que escribe el usuario (Buscador reactivo)
 searchInput.addEventListener('input', (e) => {
     const term = e.target.value.trim();
-    if (term.length > 2) { 
-        searchPeople(term); 
-    } else if (term.length === 0) { 
-        loadRecentMissing(); 
+    if (currentView === 'missing') {
+        currentPage = 1; // Reiniciar a la página 1 en cada nueva búsqueda
+        if (term.length > 2) {
+            searchPeople(term);
+        } else if (term.length === 0) {
+            loadRecentMissing();
+        }
     }
 });
 
-// Consultar base de datos según coincidencia de nombres o apellidos
+
 async function searchPeople(term) {
-    resultsContainer.innerHTML = '<p class="info-text">Buscando en la base de datos...</p>';
-    
+    resultsContainer.innerHTML = '<p class="info-text">Buscando...</p>';
     const { data, error } = await supabaseClient
         .from('affected_people')
         .select('*')
         .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
-        .order('status', { ascending: false }); // Prioriza los 'MISSING' arriba
+        .order('status', { ascending: false });
 
     if (error) {
-        resultsContainer.innerHTML = '<p class="info-text">Error al realizar la búsqueda.</p>';
-        return;
+        resultsContainer.innerHTML = '<p class="info-text">Error de búsqueda.</p>';
+    } else {
+        renderCards(data); // La paginación no se aplica en la búsqueda para mostrar todos los resultados
     }
-    renderCards(data);
 }
 
-// Pintar los datos estructurados en tarjetas visuales
 function renderCards(people) {
     if (people.length === 0) {
-        resultsContainer.innerHTML = '<p class="info-text">No se encontraron registros activos con ese nombre.</p>';
+        resultsContainer.innerHTML = '<p class="info-text">No se encontraron registros.</p>';
         return;
     }
-    
     resultsContainer.innerHTML = '';
     people.forEach(person => {
         const card = document.createElement('div');
-        // Agrega la clase 'missing' o 'found' según corresponda para pintar el borde lateral con CSS
         card.className = `card ${person.status.toLowerCase()}`;
-        
         card.innerHTML = `
             <h3>${person.first_name} ${person.last_name}</h3>
-            <p><strong>Cédula/DNI:</strong> ${person.dni ? person.dni : 'No posee o menor de edad'}</p>
-            <p><strong>Última ubicación:</strong> ${person.last_seen_location}</p>
+            <p><strong>DNI:</strong> ${person.dni || 'No posee'}</p>
+            <p><strong>Ubicación:</strong> ${person.last_seen_location}</p>
             <p><strong>Detalles:</strong> ${person.description}</p>
-            <p><strong>Contacto familiar:</strong> <a href="tel:${person.contact_phone}">${person.contact_phone}</a></p>
-            <p><strong>Condición:</strong> <strong>${person.status === 'MISSING' ? '🚨 DESAPARECIDO' : '✅ ENCONTRADO'}</strong></p>
-            ${person.current_location ? `<p><strong>Ubicación actual:</strong> ${person.current_location}</p>` : ''}
+            <p><strong>Contacto:</strong> <a href="tel:${person.contact_phone}">${person.contact_phone}</a></p>
+            <p><strong>Condición:</strong> <strong>${person.status === 'MISSING' ? '🚨 DESAPARECIDO' : (person.status === 'FOUND' ? '✅ ENCONTRADO' : '🕯️FALLECIDO')}</strong></p>
         `;
         resultsContainer.appendChild(card);
     });
 }
 
-// Cargar por defecto las últimas 10 novedades del sismo
 async function loadRecentMissing() {
-    const { data, error } = await supabaseClient
-        .from('affected_people')
-        .select('*')
-        .limit(10)
-        .order('created_at', { ascending: false });
+    resultsContainer.innerHTML = '<p class="info-text">Cargando reportes...</p>';
+    document.getElementById('search-section').style.display = 'block';
+    document.getElementById('actions-section').style.display = 'flex';
+    
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
 
-    if (!error) {
-        renderCards(data);
+    const { data, error, count } = await supabaseClient
+        .from('affected_people')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+    if (error) {
+        resultsContainer.innerHTML = '<p>Error de conexión.</p>';
+        document.getElementById('pagination-container').style.display = 'none';
     } else {
-        resultsContainer.innerHTML = '<p class="info-text">Error al conectar con la base de datos de emergencia.</p>';
+        totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+        renderCards(data);
+        updatePaginationUI();
+        document.getElementById('pagination-container').style.display = data.length > 0 ? 'flex' : 'none';
     }
 }
 
-// Inicialización de la pantalla al cargar la página
-loadRecentMissing();
+function updatePaginationUI() {
+    const pageInfo = document.getElementById('page-info');
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+
+    prevButton.disabled = currentPage === 1;
+    nextButton.disabled = currentPage === totalPages;
+
+    // Ocultar paginación si solo hay una página
+    const paginationContainer = document.getElementById('pagination-container');
+    if (totalPages <= 1) {
+        paginationContainer.style.display = 'none';
+    }
+}
+
+// --- CORRECCIÓN EN LA INICIALIZACIÓN ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadModals();
+    updateStats();
+    
+    // Configuración inicial de la vista: Cargar Ayuda por defecto
+    const btnHelp = document.getElementById('btn-view-help');
+    const btnMissing = document.getElementById('btn-view-missing');
+    
+    // IMPORTANTE: Aseguramos que el estado sea el correcto
+    currentView = 'help'; 
+    if (btnHelp) btnHelp.classList.add('active');
+    if (btnMissing) btnMissing.classList.remove('active');
+    
+    loadHelpRequests(); 
+
+    // Eventos de paginación (asegúrate de que los IDs existan en index.html)
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadRecentMissing();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadRecentMissing();
+        }
+    });
+});
