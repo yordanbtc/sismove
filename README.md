@@ -3,7 +3,12 @@
 Plataforma de reporte y localización de personas afectadas y solicitudes de ayuda ante la emergencia sísmica en Venezuela.
 
 ## Propósito del Proyecto
-Este proyecto surge a partir de la necesidad urgente de organizar y canalizar la información durante la emergencia tras el terremoto reciente en Venezuela. Es una iniciativa **sin fines de lucro**, desarrollada con el objetivo de facilitar la conexión entre personas desaparecidas, encontrados y quienes requieren asistencia inmediata.
+Este proyecto surge a partir de la necesidad urgente de organizar y canalizar la información durante la emergencia tras el terremoto reciente en Venezuela. Es una iniciativa **sin fines de lucro**, desarrollada con el objetivo de facilitar la conexión entre personas desaparecidas, encontradas y quienes requieren asistencia inmediata.
+
+**Nota importante:** El sistema de reportes de ayuda funciona como un mecanismo práctico y directo para facilitar las labores de búsqueda y rescate, permitiendo que la información crítica llegue de manera organizada a quienes coordinan la ayuda.
+
+## Colaboración con Autoridades
+La base de datos generada por esta plataforma estará a total disposición de las autoridades competentes del Estado venezolano. Esta información tiene como objetivo ser un insumo técnico que apoye y agilice los protocolos de respuesta, búsqueda y rescate ante la emergencia actual.
 
 ## Declaración de Responsabilidad
 **AVISO LEGAL:** La información suministrada a través de esta plataforma es responsabilidad exclusiva de quien la ingresa. Como creador de esta herramienta, no me hago responsable por la veracidad, exactitud o uso indebido de los datos publicados. 
