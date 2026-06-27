@@ -38,9 +38,6 @@ Al ingresar a la aplicación, verás dos pestañas principales:
 ### 3. Búsqueda
 En la pestaña de **Desaparecidos**, puedes utilizar la barra de búsqueda para filtrar registros escribiendo el nombre o apellido de la persona que buscas.
 
-## Tecnologías Utilizadas
-* **Frontend:** HTML5, CSS3, JavaScript.
-* **Backend/Base de Datos:** [Supabase](https://supabase.com/).
 
 ---
 *Esta plataforma es una herramienta colaborativa. Por favor, úsala con responsabilidad y ética durante estos momentos de dificultad.*
