@@ -200,12 +200,17 @@ document.addEventListener('submit', async (e) => {
     if (e.target.id === 'form-help') {
         e.preventDefault();
 
+        const userIp = await getClientIP(); 
+        const userAgent = navigator.userAgent; // Capturamos el navegador/dispositivo
+
         const { error } = await supabaseClient.from('help_requests').insert([{
             contact_name: document.getElementById('h-name').value.trim(),
             phone: document.getElementById('h-phone').value.trim(),
             location: document.getElementById('h-location').value.trim(),
             category: document.getElementById('h-category').value,
-            case_description: document.getElementById('h-description').value.trim()
+            case_description: document.getElementById('h-description').value.trim(),
+            ip_address: userIp,       
+            user_agent: userAgent     
         }]);
 
         if (error) {
