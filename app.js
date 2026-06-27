@@ -51,7 +51,6 @@ async function updateStats() {
 
 // --- NAVEGACIÓN ENTRE VISTAS ---
 
-// Corrección: Asegurar que switchView maneje bien el paginado
 function switchView(view) {
     currentView = view;
     currentPage = 1; 
@@ -62,15 +61,22 @@ function switchView(view) {
     if (btnMissing) btnMissing.classList.toggle('active', view === 'missing');
     if (btnHelp) btnHelp.classList.toggle('active', view === 'help');
 
-    // Limpiar búsqueda
+    // Limpiar búsqueda al cambiar de vista
     const searchInput = document.getElementById('search-input');
-    if(searchInput) searchInput.value = '';
+    if(searchInput) {
+        searchInput.value = '';
+        // Cambiar placeholder según la vista
+        searchInput.placeholder = (view === 'missing') 
+            ? "Escribe nombre o apellido..." 
+            : "Escribe la localidad o sector...";
+    }
+
+    // SIEMPRE mostrar la sección de búsqueda
+    document.getElementById('search-section').style.display = 'block';
 
     if (view === 'missing') {
-        document.getElementById('search-section').style.display = 'block';
         loadRecentMissing();
     } else {
-        document.getElementById('search-section').style.display = 'none';
         document.getElementById('pagination-container').style.display = 'none';
         loadHelpRequests();
     }
@@ -229,16 +235,40 @@ const resultsContainer = document.getElementById('results-container');
 
 searchInput.addEventListener('input', (e) => {
     const term = e.target.value.trim();
+    
     if (currentView === 'missing') {
-        currentPage = 1; // Reiniciar a la página 1 en cada nueva búsqueda
+        // Lógica existente para desaparecidos
+        currentPage = 1;
         if (term.length > 2) {
             searchPeople(term);
         } else if (term.length === 0) {
             loadRecentMissing();
         }
+    } else if (currentView === 'help') {
+        // NUEVA LÓGICA: Búsqueda por localidad
+        if (term.length > 2) {
+            searchHelpByLocation(term);
+        } else if (term.length === 0) {
+            loadHelpRequests();
+        }
     }
 });
 
+// Nueva función para buscar ayuda por ubicación
+async function searchHelpByLocation(term) {
+    resultsContainer.innerHTML = '<p class="info-text">Buscando en esa ubicación...</p>';
+    const { data, error } = await supabaseClient
+        .from('help_requests')
+        .select('*')
+        .ilike('location', `%${term}%`) // Busca el término dentro de la columna location
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        resultsContainer.innerHTML = '<p class="info-text">Error de búsqueda.</p>';
+    } else {
+        renderHelpCards(data);
+    }
+}
 
 async function searchPeople(term) {
     resultsContainer.innerHTML = '<p class="info-text">Buscando...</p>';
