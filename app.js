@@ -361,6 +361,11 @@ document.addEventListener('DOMContentLoaded', () => {
     currentView = 'help'; 
     if (btnHelp) btnHelp.classList.add('active');
     if (btnMissing) btnMissing.classList.remove('active');
+
+    // INICIALIZACIÓN DE PLACEHOLDER PARA AYUDAS
+    if (searchInput) {
+        searchInput.placeholder = "Escribe la localidad para buscar ayuda...";
+    }
     
     loadHelpRequests(); 
 
