@@ -161,6 +161,8 @@ document.addEventListener('submit', async (e) => {
     if (e.target.id === 'form-missing') {
         e.preventDefault();
 
+        const userIp = await getClientIP(); 
+        const userAgent = navigator.userAgent; // Capturamos el navegador/dispositivo
         const status = document.getElementById('m-status').value;        
         const firstName = document.getElementById('m-firstname').value.trim();
         const lastName = document.getElementById('m-lastname').value.trim();
@@ -178,7 +180,9 @@ document.addEventListener('submit', async (e) => {
             dni: dni,
             last_seen_location: location,
             description: description,
-            contact_phone: phone
+            contact_phone: phone,
+            ip_address: userIp,       // NUEVO: Asegúrate de tener esta columna en la tabla
+            user_agent: userAgent
         }]);
 
         if (error) {
@@ -340,3 +344,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// --- OBTENER LA IP ---
+async function getClientIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (error) {
+        console.warn("No se pudo obtener la IP:", error);
+        return '0.0.0.0'; // Valor por defecto si falla
+    }
+}
