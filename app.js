@@ -185,14 +185,24 @@ function renderCards(people) {
     const resultsContainer = document.getElementById('results-container');
     if (people.length === 0) { resultsContainer.innerHTML = '<p class="info-text">No se encontraron registros.</p>'; return; }
     resultsContainer.innerHTML = '';
+    
     people.forEach(person => {
         const card = document.createElement('div');
-        card.className = `card ${person.status.toLowerCase()}`;
-        card.innerHTML = `<h3>${person.first_name} ${person.last_name}</h3>
-            <p><strong>Fecha:</strong> ${formatDate(person.created_at)}</p>
-            <p><strong>DNI:</strong> ${person.dni || 'No posee'}</p>
-            <p><strong>Ubicación:</strong> ${person.last_seen_location}</p>
-            <p><strong>Condición:</strong> <strong>${person.status === 'MISSING' ? '🚨 DESAPARECIDO' : (person.status === 'FOUND' ? '✅ ENCONTRADO' : '🕯️FALLECIDO')}</strong></p>`;
+        card.className = `card card-horizontal ${person.status.toLowerCase()}`;
+        
+        // Si no hay foto, usamos un placeholder o simplemente omitimos el div
+        const photoHtml = person.photo_url 
+            ? `<div class="card-photo"><img src="${person.photo_url}" alt="Foto"></div>` 
+            : `<div class="card-photo"><div class="no-photo">Sin foto</div></div>`;
+
+        card.innerHTML = `
+            ${photoHtml}
+            <div class="card-info">
+                <h3>${person.first_name} ${person.last_name}</h3>
+                <p><strong>Fecha:</strong> ${formatDate(person.created_at)}</p>
+                <p><strong>Ubicación:</strong> ${person.last_seen_location}</p>
+                <p><strong>Condición:</strong> <strong>${person.status === 'MISSING' ? '🚨 DESAPARECIDO' : (person.status === 'FOUND' ? '✅ ENCONTRADO' : '🕯️FALLECIDO')}</strong></p>
+            </div>`;
         resultsContainer.appendChild(card);
     });
 }
@@ -219,7 +229,25 @@ document.addEventListener('submit', async (e) => {
 
     if (e.target.id === 'form-missing') {
         e.preventDefault();
+        
+        let photoUrl = null;
+        const fileInput = document.getElementById('m-photo'); // ID del input file
+        
+        // 1. Intentar subir la foto si existe
+        if (fileInput && fileInput.files.length > 0) {
+            try {
+                // Usamos la función de compresión/subida que definimos antes
+                photoUrl = await uploadCompressedPhoto(fileInput.files[0], currentUser.id);
+            } catch (err) {
+                console.error("Error al subir foto:", err);
+                alert("Hubo un error al subir la foto, intenta de nuevo.");
+                return; // Detenemos el registro si la foto falla
+            }
+        }
+
         const userIp = await getClientIP();
+        
+        // 2. Insertar con el photo_url (Asegúrate de que esta columna exista en tu tabla)
         const { error } = await supabaseClient.from('affected_people').insert([{
             status: document.getElementById('m-status').value,
             first_name: document.getElementById('m-firstname').value.trim(),
@@ -231,9 +259,19 @@ document.addEventListener('submit', async (e) => {
             contact_phone: document.getElementById('m-phone').value.trim(),
             ip_address: userIp,
             user_agent: navigator.userAgent,
-            supabase_user_id: currentUser.id
+            supabase_user_id: currentUser.id,
+            photo_url: photoUrl // NUEVO: Guardamos la URL
         }]);
-        if (!error) { alert('Registrado exitosamente.'); e.target.reset(); closeModal('modal-missing'); loadRecentMissing(); updateStats(); }
+        
+        if (!error) { 
+            alert('Registrado exitosamente.'); 
+            e.target.reset(); 
+            closeModal('modal-missing'); 
+            loadRecentMissing(); 
+            updateStats(); 
+        } else {
+            console.error("Error al insertar en BD:", error);
+        }
     }
 
     if (e.target.id === 'form-help') {
