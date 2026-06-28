@@ -372,3 +372,36 @@ async function registerAuthorizedPersonnel() {
     }
 
 }
+
+async function uploadCompressedPhoto(file, userId) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                // Redimensionar para optimizar peso (máx 800px ancho)
+                const scale = Math.min(800 / img.width, 1);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Convertir a Blob con calidad 0.7
+                canvas.toBlob(async (blob) => {
+                    const fileName = `${userId}/${Date.now()}.jpg`;
+                    const { data, error } = await supabaseClient.storage
+                        .from('photos')
+                        .upload(fileName, blob, { contentType: 'image/jpeg' });
+                    
+                    if (error) reject(error);
+                    else {
+                        const { data: publicData } = supabaseClient.storage.from('photos').getPublicUrl(fileName);
+                        resolve(publicData.publicUrl);
+                    }
+                }, 'image/jpeg', 0.7);
+            };
+        };
+    });
+}
