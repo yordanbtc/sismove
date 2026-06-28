@@ -201,6 +201,7 @@ function renderCards(people) {
                 <h3>${person.first_name} ${person.last_name}</h3>
                 <p><strong>Fecha:</strong> ${formatDate(person.created_at)}</p>
                 <p><strong>Ubicación:</strong> ${person.last_seen_location}</p>
+                <p><strong>Contacto:</strong> ${person.contact_phone}</p>
                 <p><strong>Condición:</strong> <strong>${person.status === 'MISSING' ? '🚨 DESAPARECIDO' : (person.status === 'FOUND' ? '✅ ENCONTRADO' : '🕯️FALLECIDO')}</strong></p>
             </div>`;
         resultsContainer.appendChild(card);
